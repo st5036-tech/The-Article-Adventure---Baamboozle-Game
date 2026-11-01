@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE ARTICLE ADVENTURE: A, AN & THE</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+
+        .font-display {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* 3D Card Flip Animation Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #818cf8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between min-h-screen relative overflow-x-hidden selection:bg-pink-500 selection:text-white">
+
+    <!-- TOP HEADER / NAV -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-indigo-100 px-4 py-3 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20">
+                    <i class="fa-solid font-bold fa-bolt text-xl text-amber-300"></i>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl sm:text-2xl font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+                        THE ARTICLE ADVENTURE
+                    </h1>
+                    <p class="text-xs text-indigo-900/70 font-semibold hidden sm:block">A, AN & THE • High School Edition (5th Semester)</p>
+                </div>
+            </div>
+
+            <!-- Game Control Buttons -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSound()" id="sound-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 transition">
+                    <i class="fa-solid fa-volume-high text-indigo-600" id="sound-icon"></i> <span id="sound-text">Sound ON</span>
+                </button>
+                <button onclick="openRulesModal()" class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 transition">
+                    <i class="fa-solid fa-book-open text-purple-600"></i> Rules
+                </button>
+                <button onclick="resetGameConfirmation()" class="px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 text-xs font-semibold flex items-center gap-2 transition">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- LEADERBOARD / TEAM SCORES -->
+    <section class="max-w-7xl w-full mx-auto px-4 pt-4">
+        <div class="bg-white/80 border border-indigo-100 rounded-2xl p-3 sm:p-4 backdrop-blur-md shadow-lg shadow-indigo-500/5">
+            <div class="flex items-center justify-between mb-2 px-1">
+                <span class="text-xs uppercase tracking-wider text-indigo-900 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy text-amber-500"></i> Teams & Leaderboard
+                </span>
+                <span id="active-turn-indicator" class="text-xs font-bold text-pink-600 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-200">
+                    Active Turn: <span id="active-team-name" class="text-slate-900 font-black">Team 1</span>
+                </span>
+            </div>
+            
+            <div id="teams-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                <!-- Dynamic Teams injected here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN GAME BOARD GRID -->
+    <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-grow">
+        <div id="game-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            <!-- 20 Interactive Tiles Generated by JS -->
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white/80 border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p>Baamboozle Edition • Master "A", "AN" & "THE" Vowel vs. Consonant Sound Exceptions</p>
+    </footer>
+
+    <!-- MODAL: CARD ACTION (Question / Power-Up Reveal) -->
+    <div id="card-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-box" class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
+            
+            <!-- Modal Header -->
+            <div id="modal-header-bg" class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span id="modal-card-num" class="font-display text-2xl font-black bg-white/20 px-3 py-0.5 rounded-xl text-white">#1</span>
+                    <div>
+                        <span id="modal-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-black/20 text-yellow-300 border border-yellow-300/40">
+                            ARTICLE DETECTIVE
+                        </span>
+                        <h3 id="modal-title" class="font-bold text-lg text-white leading-snug">Challenge Tile</h3>
+                    </div>
+                </div>
+                <div id="modal-pts-badge" class="bg-amber-400 text-slate-950 font-black px-3 py-1 rounded-xl text-sm shadow">
+                    +50 XP
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5">
+                
+                <!-- Speed Timer -->
+                <div id="timer-bar-container" class="hidden space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-pink-600">
+                        <span><i class="fa-solid fa-stopwatch"></i> SPEED CHALLENGE!</span>
+                        <span id="timer-text">5s</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-pink-200">
+                        <div id="timer-fill" class="bg-gradient-to-r from-pink-500 to-rose-500 h-full w-full transition-all duration-1000 ease-linear"></div>
+                    </div>
+                </div>
+
+                <!-- Content Display (Question/Sentence/Power-up description) -->
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <p id="modal-prompt" class="text-indigo-900/70 text-xs font-bold uppercase tracking-wider mb-2">Identify the missing article:</p>
+                    <div id="modal-content" class="text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed">
+                        <!-- Dynamic text/options -->
+                    </div>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div id="options-container" class="grid grid-cols-3 gap-3 hidden">
+                    <!-- Option buttons -->
+                </div>
+
+                <!-- Active Team Modifier Controls / Powerup Target Selection -->
+                <div id="powerup-controls" class="hidden bg-indigo-50 p-4 rounded-xl border border-indigo-200 space-y-3">
+                    <label class="block text-xs font-bold text-indigo-900 uppercase">Select Target Team for Power-Up:</label>
+                    <select id="target-team-select" class="w-full bg-white border border-indigo-300 rounded-xl p-2.5 text-slate-800 text-sm font-semibold focus:outline-none focus:border-pink-500">
+                        <!-- Target options filled via JS -->
+                    </select>
+                </div>
+
+                <!-- Answer Revelation Area -->
+                <div id="answer-box" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center gap-2 text-emerald-700 font-bold text-sm">
+                        <i class="fa-solid fa-circle-check text-lg"></i> Correct Answer & Rule:
+                    </div>
+                    <p id="answer-text" class="text-slate-900 font-bold text-lg"></p>
+                    <p id="explanation-text" class="text-emerald-900/80 text-xs sm:text-sm font-medium leading-relaxed border-t border-emerald-200 pt-2"></p>
+                </div>
+
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="bg-slate-50 px-6 py-4 flex flex-wrap gap-3 justify-end border-t border-slate-200">
+                <button id="btn-reveal" onclick="revealAnswer()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-sm shadow-md shadow-indigo-500/20 transition">
+                    <i class="fa-solid fa-eye mr-1.5"></i> Reveal Answer
+                </button>
+                <button id="btn-correct" onclick="processResult(true)" class="hidden px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition">
+                    <i class="fa-solid fa-check mr-1.5"></i> Correct (+XP)
+                </button>
+                <button id="btn-wrong" onclick="processResult(false)" class="hidden px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md shadow-rose-600/20 transition">
+                    <i class="fa-solid fa-xmark mr-1.5"></i> Incorrect (0 XP)
+                </button>
+                <button id="btn-apply-powerup" onclick="applyPowerUpEffect()" class="hidden px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-sm shadow-md shadow-amber-400/20 transition">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Execute Power-Up
+                </button>
+                <button id="btn-close-modal" onclick="closeModal()" class="hidden px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition">
+                    Done & Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RULES MODAL -->
+    <div id="rules-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-display text-2xl font-bold text-indigo-900">Game Rules & Grammar Guide</h3>
+                <button onclick="closeRulesModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="space-y-3 text-sm text-slate-600 leading-relaxed">
+                <div class="bg-indigo-50 p-3.5 rounded-xl border border-indigo-100">
+                    <h4 class="font-bold text-indigo-900 text-base mb-1">Key Article Pronunciation Rules:</h4>
+                    <ul class="list-disc list-inside space-y-1 text-xs text-indigo-950">
+                        <li><strong class="text-pink-600">A:</strong> Used before words starting with a <u>CONSONANT SOUND</u> (e.g., <em>a European tour</em> [/j/ sound], <em>a university</em>).</li>
+                        <li><strong class="text-pink-600">AN:</strong> Used before words starting with a <u>VOWEL SOUND</u> (e.g., <em>an hour</em> [/h/ is silent], <em>an honest person</em>, <em>an MBA degree</em> [/em/ sound]).</li>
+                        <li><strong class="text-pink-600">THE:</strong> Used for specific, unique, or previously identified items/people in context.</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800">How to Play Baamboozle:</h4>
+                    <ol class="list-decimal list-inside space-y-1 text-xs text-slate-600">
+                        <li>Divide the class into up to 5 teams. Take turns selecting a tile.</li>
+                        <li>Click the tile to reveal the question or Power-Up event.</li>
+                        <li>Answer within the time limit (if applicable).</li>
+                        <li>Teacher reveals answer and clicks <strong>Correct</strong> or <strong>Incorrect</strong> to automatically award points and trigger power-up mechanics.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="pt-2 text-right">
+                <button onclick="closeRulesModal()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">Got It!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. GAME DATA & CARDS (20 Unique Challenges + Power-Ups)
+           ========================================================================== */
+        const gameCards = [
+            {
+                id: 1,
+                type: "Article Detective",
+                categoryBadge: "ARTICLE DETECTIVE",
+                categoryColor: "from-blue-600 to-indigo-600",
+                points: 50,
+                prompt: "Complete the sentence with A, AN, or THE:",
+                content: "My cousin wants to study engineering at ______ university in the United Kingdom.",
+                options: ["a", "an", "the"],
+                answer: "A",
+                explanation: "Although 'university' starts with the vowel letter 'u', it starts with a consonant sound (/juː/). Therefore, we use 'a university'.",
+                icon: "fa-magnifying-glass"
+            },
+            {
+                id: 2,
+                type: "Grammar Emergency",
+                categoryBadge: "GRAMMAR EMERGENCY",
+                categoryColor: "from-rose-600 to-red-600",
+                points: 50,
+                prompt: "Find and fix the article mistake in this sentence:",
+                content: "\"She has been waiting at the coffee shop for an hour and a half, reading an book.\"",
+                answer: "Replace 'an book' with 'A book'",
+                explanation: "'Book' starts with a consonant sound (/b/), so it requires 'a book'. ('An hour' is correct because 'h' is silent).",
+                icon: "fa-kit-medical"
+            },
+            {
+                id: 3,
+                type: "Choose the Door",
+                categoryBadge: "CHOOSE THE DOOR",
+                categoryColor: "from-emerald-600 to-teal-600",
+                points: 50,
+                prompt: "Pick the correct option to fill the blank:",
+                content: "Honestly, he is ______ honest politician, which is quite rare nowadays!",
+                options: ["A", "AN", "THE"],
+                answer: "AN",
+                explanation: "In 'honest', the letter 'h' is silent, so the word starts with a vowel sound (/ɒnɪst/). We use 'an honest'.",
+                icon: "fa-door-open"
+            },
+            {
+                id: 4,
+                type: "PowerUp",
+                categoryBadge: "SPECIAL POWER-UP",
+                categoryColor: "from-amber-500 to-yellow-600",
+                points: 0,
+                prompt: "POWER-UP CARD ACTIVATED!",
+                content: "⚡ STEAL 50 XP! Choose another team and steal 50 XP from their score!",
+                powerupType: "STEAL_50",
+                icon: "fa-hand-holding-dollar"
+            },
+            {
+                id: 5,
+                type: "Speed Challenge",
+                categoryBadge: "SPEED CHALLENGE (5s)",
+                categoryColor: "from-pink-600 to-rose-600",
+                points: 100,
+                isTimed: true,
+                timerSeconds: 5,
+                prompt: "Quick! You have 5 SECONDS to answer:",
+                content: "Fill in: \"I saw ______ eagle soaring high above the mountains.\"",
+                answer: "AN",
+                explanation: "'Eagle' begins with a vowel sound (/iː/), so it requires 'an eagle'.",
+                icon: "fa-stopwatch"
+            },
+            {
+                id: 6,
+                type: "Crazy Sentence",
+                categoryBadge: "CRAZY SENTENCE",
+                categoryColor: "from-purple-600 to-pink-600",
+                points: 50,
+                prompt: "Complete this wild sentence with the correct articles:",
+                content: " Yesterday, ______ alien wearing ______ European suit stole my homework!",
+                answer: "AN alien / A European suit",
+                explanation: "'Alien' starts with a vowel sound -> 'AN alien'. 'European' starts with a consonant sound (/jʊərəˈpiːən/) -> 'A European'.",
+                icon: "fa-face-grin-tears"
+            },
+            {
+                id: 7,
+                type: "Explain Choice",
+                categoryBadge: "EXPLAIN YOUR CHOICE",
+                categoryColor: "from-cyan-600 to-blue-600",
+                points: 75,
+                prompt: "State the missing article AND explain why:",
+                content: "\"We spent _____ hour talking about _____ UFO spotted near campus.\"",
+                answer: "AN hour / A UFO",
+                explanation: "'Hour' has a silent 'h' (vowel sound /aʊə/) -> AN. 'UFO' starts with consonant sound (/juː-ef-əʊ/) -> A.",
+                icon: "fa-comment-dots"
+            },
+            {
+                id: 8,
+                type: "PowerUp",
+                categoryBadge: "SPECIAL POWER-UP",
+                categoryColor: "from-purple-500 to-violet-700",
+                points: 0,
+                prompt: "POWER-UP CARD ACTIVATED!",
+                content: "✨ DOUBLE POINTS! Your team will earn DOUBLE XP on your NEXT correct answer!",
+                powerupType: "DOUBLE_NEXT",
+                icon: "fa-angles-up"
+            },
+            {
+                id: 9,
+                type: "Article Detective",
+                categoryBadge: "ARTICLE DETECTIVE",
+                categoryColor: "from-blue-600 to-indigo-600",
+                points: 50,
+                prompt: "Fill in the blank:",
+                content: "Can you pass me ______ salt from the table, please?",
+                answer: "THE",
+                explanation: "We use 'THE' because both speaker and listener know which specific salt shaker is being referred to on the table.",
+                icon: "fa-magnifying-glass"
+            },
+            {
+                id: 10,
+                type: "Grammar Emergency",
+                categoryBadge: "GRAMMAR EMERGENCY",
+                categoryColor: "from-rose-600 to-red-600",
+                points: 50,
+                prompt: "Correct the article error:",
+                content: "\"My uncle received a MBA degree from Harvard after writing an 800-page thesis.\"",
+                answer: "Change 'a MBA' to 'AN MBA'",
+                explanation: "When pronouncing 'MBA', the letter M is pronounced /ɛm/ (starts with a vowel sound). Thus: 'an MBA degree'.",
+                icon: "fa-kit-medical"
+            },
+            {
+                id: 11,
+                type: "Choose the Door",
+                categoryBadge: "CHOOSE THE DOOR",
+                categoryColor: "from-emerald-600 to-teal-600",
+                points: 50,
+                prompt: "Select the right article:",
+                content: "Mount Everest is ______ highest mountain peak in the world.",
+                options: ["A", "AN", "THE"],
+                answer: "THE",
+                explanation: "We always use 'THE' with superlative adjectives ('the highest', 'the best', 'the most expensive').",
+                icon: "fa-door-open"
+            },
+            {
+                id: 12,
+                type: "PowerUp",
+                categoryBadge: "SPECIAL POWER-UP",
+                categoryColor: "from-amber-600 to-orange-600",
+                points: 0,
+                prompt: "POWER-UP CARD ACTIVATED!",
+                content: "🎯 CHALLENGE A TEAM! Choose another team to answer your next question. If they fail, your team gets +50 XP!",
+                powerupType: "CHALLENGE_TEAM",
+                icon: "fa-bullseye"
+            },
+            {
+                id: 13,
+                type: "Crazy Sentence",
+                categoryBadge: "CRAZY SENTENCE",
+                categoryColor: "from-purple-600 to-pink-600",
+                points: 50,
+                prompt: "Fill in the blanks with correct articles:",
+                content: "______ llama in ______ unicorn costume danced salsa at the prom!",
+                answer: "A llama / A unicorn costume",
+                explanation: "'Llama' starts with /l/ sound -> A. 'Unicorn' starts with /juː/ consonant sound -> A (not AN!).",
+                icon: "fa-face-grin-tears"
+            },
+            {
+                id: 14,
+                type: "Explain Choice",
+                categoryBadge: "EXPLAIN YOUR CHOICE",
+                categoryColor: "from-cyan-600 to-blue-600",
+                points: 75,
+                prompt: "Explain why this choice is made:",
+                content: "Why do we say \"AN heir to the throne\" but \"A hair on my head\"?",
+                answer: "'Heir' has a silent 'h' (/ɛə/), whereas 'Hair' has a pronounced 'h' (/hɛə/).",
+                explanation: "Articles depend on the initial SOUND of the spoken word, not the letters written on paper!",
+                icon: "fa-comment-dots"
+            },
+            {
+                id: 15,
+                type: "PowerUp",
+                categoryBadge: "SPECIAL POWER-UP",
+                categoryColor: "from-blue-500 to-cyan-600",
+                points: 0,
+                prompt: "POWER-UP CARD ACTIVATED!",
+                content: "🛡️ SHIELD PROTECT! Protect your team from the next score deduction or stolen points!",
+                powerupType: "SHIELD",
+                icon: "fa-shield-halved"
+            },
+            {
+                id: 16,
+                type: "Speed Challenge",
+                categoryBadge: "SPEED CHALLENGE (5s)",
+                categoryColor: "from-pink-600 to-rose-600",
+                points: 100,
+                isTimed: true,
+                timerSeconds: 5,
+                prompt: "Quick! You have 5 SECONDS:",
+                content: "Choose correct: \"______ sun sets in the west.\"",
+                answer: "THE",
+                explanation: "Use 'THE' with celestial bodies and unique natural items ('the sun', 'the moon', 'the sky').",
+                icon: "fa-stopwatch"
+            },
+            {
+                id: 17,
+                type: "PowerUp",
+                categoryBadge: "SPECIAL POWER-UP",
+                categoryColor: "from-emerald-500 to-teal-700",
+                points: 0,
+                prompt: "POWER-UP CARD ACTIVATED!",
+                content: "🚀 TAKE THE LEAD! Earn +100 INSTANT BONUS XP for your team right now!",
+                powerupType: "BONUS_100",
+                icon: "fa-rocket"
+            },
+            {
+                id: 18,
+                type: "Article Detective",
+                categoryBadge: "ARTICLE DETECTIVE",
+                categoryColor: "from-blue-600 to-indigo-600",
+                points: 50,
+                prompt: "Complete the sentence:",
+                content: "She is playing ______ violin in the school concert tonight.",
+                answer: "THE",
+                explanation: "We use 'THE' when referring to playing musical instruments ('play the piano', 'play the violin').",
+                icon: "fa-magnifying-glass"
+            },
+            {
+                id: 19,
+                type: "PowerUp",
+                categoryBadge: "SPECIAL POWER-UP",
+                categoryColor: "from-fuchsia-600 to-pink-600",
+                points: 0,
+                prompt: "POWER-UP CARD ACTIVATED!",
+                content: "🔄 SCORE SWAP! Choose any rival team and SWAP your total points with theirs!",
+                powerupType: "SWAP_SCORES",
+                icon: "fa-repeat"
+            },
+            {
+                id: 20,
+                type: "Boss Challenge",
+                categoryBadge: "🔥 BOSS CHALLENGE 🔥",
+                categoryColor: "from-red-600 via-rose-600 to-amber-600",
+                points: 100,
+                prompt: "Correct ALL THREE mistakes in a row to win +100 XP:",
+                content: "1. \"He is an unique boy.\"\n2. \"I'll see you in a hour.\"\n3. \"She plays a guitar.\"",
+                answer: "1. A unique boy\n2. AN hour\n3. THE guitar",
+                explanation: "'Unique' = /juː/ sound (A). 'Hour' = silent H (AN). Instruments use 'THE guitar'. Perfect triple victory!",
+                icon: "fa-crown"
+            }
+        ];
+
+        /* ==========================================================================
+           2. GAME STATE & TEAMS
+           ========================================================================== */
+        let teams = [
+            { id: 1, name: "Alpha Squad", score: 0, shield: false, doubleNext: false, color: "from-blue-500 to-cyan-500" },
+            { id: 2, name: "Grammar Gurus", score: 0, shield: false, doubleNext: false, color: "from-purple-500 to-pink-500" },
+            { id: 3, name: "Vowel Vipers", score: 0, shield: false, doubleNext: false, color: "from-emerald-500 to-teal-500" },
+            { id: 4, name: "Syntax Stars", score: 0, shield: false, doubleNext: false, color: "from-amber-500 to-orange-500" },
+            { id: 5, name: "Article Aces", score: 0, shield: false, doubleNext: false, color: "from-rose-500 to-red-500" }
+        ];
+
+        let activeTeamIdx = 0;
+        let activeCard = null;
+        let playedCards = new Set();
+        let timerInterval = null;
+        let soundEnabled = true;
+
+        /* ==========================================================================
+           3. SOUND EFFECTS (Tone.js)
+           ========================================================================== */
+        const synth = new Tone.Synth().toDestination();
+        const polySynth = new Tone.PolySynth().toDestination();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const now = Tone.now();
+                if (type === 'flip') {
+                    synth.triggerAttackRelease("C5", "8n", now);
+                } else if (type === 'correct') {
+                    polySynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", now);
+                } else if (type === 'wrong') {
+                    polySynth.triggerAttackRelease(["F3", "C3"], "4n", now);
+                } else if (type === 'powerup') {
+                    polySynth.triggerAttackRelease(["E4", "G#4", "B4", "E5"], "6n", now);
+                } else if (type === 'tick') {
+                    synth.triggerAttackRelease("A5", "32n", now);
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById("sound-icon");
+            const text = document.getElementById("sound-text");
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-indigo-400";
+                text.innerText = "Sound ON";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-slate-500";
+                text.innerText = "Sound OFF";
+            }
+        }
+
+        /* ==========================================================================
+           4. INITIALIZATION & RENDERING
+           ========================================================================== */
+        window.onload = function() {
+            renderTeams();
+            renderBoard();
+        };
+
+        function renderTeams() {
+            const container = document.getElementById("teams-container");
+            container.innerHTML = "";
+
+            teams.forEach((t, idx) => {
+                const isActive = idx === activeTeamIdx;
+                const activeClasses = isActive 
+                    ? "ring-2 ring-pink-500 scale-[1.02] shadow-lg shadow-pink-500/10 bg-white" 
+                    : "bg-white/70 hover:bg-white";
+
+                const cardHtml = `
+                    <div onclick="selectActiveTeam(${idx})" class="cursor-pointer p-3 rounded-xl border border-slate-200/90 ${activeClasses} transition-all duration-200 flex flex-col justify-between relative overflow-hidden">
+                        <div class="h-1 w-full bg-gradient-to-r ${t.color} absolute top-0 left-0"></div>
+                        <div class="flex items-center justify-between gap-1 mb-1">
+                            <span class="font-bold text-xs sm:text-sm text-slate-800 truncate">${t.name}</span>
+                            <div class="flex items-center gap-1">
+                                ${t.shield ? '<i class="fa-solid fa-shield text-cyan-500 text-xs" title="Shielded"></i>' : ''}
+                                ${t.doubleNext ? '<i class="fa-solid fa-bolt text-amber-500 text-xs" title="2x Multiplier"></i>' : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span class="text-xs font-semibold text-slate-400">Score</span>
+                            <span class="font-display font-black text-xl text-indigo-600">${t.score} <span class="text-xs font-normal text-indigo-400">XP</span></span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            });
+
+            document.getElementById("active-team-name").innerText = teams[activeTeamIdx].name;
+        }
+
+        function selectActiveTeam(idx) {
+            activeTeamIdx = idx;
+            renderTeams();
+            playSound('tick');
+        }
+
+        function renderBoard() {
+            const grid = document.getElementById("game-grid");
+            grid.innerHTML = "";
+
+            gameCards.forEach((card) => {
+                const isPlayed = playedCards.has(card.id);
+                
+                const tile = document.createElement("div");
+                tile.className = "perspective-1000 h-28 sm:h-36 cursor-pointer";
+                
+                tile.innerHTML = `
+                    <div id="tile-inner-${card.id}" onclick="openCard(${card.id})" class="w-full h-full transform-style-3d transition-transform duration-500 rounded-2xl shadow-md shadow-indigo-500/5 relative ${isPlayed ? 'rotate-y-180 opacity-60' : ''}">
+                        
+                        <!-- FRONT OF CARD -->
+                        <div class="absolute inset-0 backface-hidden bg-white border-2 border-indigo-100 rounded-2xl flex flex-col items-center justify-center p-3 hover:border-pink-400 hover:shadow-lg hover:scale-[1.02] transition">
+                            <span class="font-display text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-500 mb-1">
+                                ${card.id}
+                            </span>
+                            <span class="text-[10px] sm:text-xs font-bold text-indigo-900/60 uppercase tracking-wider text-center">
+                                Tap to Reveal
+                            </span>
+                        </div>
+
+                        <!-- BACK OF CARD (REVEALED STATE) -->
+                        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-slate-100 border border-slate-200 rounded-2xl flex flex-col items-center justify-center p-2 text-center">
+                            <i class="fa-solid fa-check-circle text-emerald-500 text-2xl mb-1"></i>
+                            <span class="text-xs text-slate-500 font-semibold">Completed</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(tile);
+            });
+        }
+
+        /* ==========================================================================
+           5. MODAL INTERACTION & GAME LOGIC
+           ========================================================================== */
+        function openCard(cardId) {
+            if (playedCards.has(cardId)) return;
+            
+            playSound('flip');
+            activeCard = gameCards.find(c => c.id === cardId);
+            
+            // Flip card visually
+            const inner = document.getElementById(`tile-inner-${cardId}`);
+            inner.classList.add("rotate-y-180");
+            
+            // Populate Modal Content
+            document.getElementById("modal-card-num").innerText = `#${activeCard.id}`;
+            document.getElementById("modal-badge").innerText = activeCard.categoryBadge;
+            document.getElementById("modal-title").innerText = activeCard.type;
+            
+            const headerBg = document.getElementById("modal-header-bg");
+            headerBg.className = `bg-gradient-to-r ${activeCard.categoryColor} px-6 py-4 flex justify-between items-center`;
+
+            document.getElementById("modal-pts-badge").innerText = activeCard.points > 0 ? `+${activeCard.points} XP` : "POWER-UP";
+            document.getElementById("modal-prompt").innerText = activeCard.prompt;
+            
+            // Format Content
+            const contentBox = document.getElementById("modal-content");
+            contentBox.innerText = activeCard.content;
+
+            // Reset Elements Visibility
+            document.getElementById("answer-box").classList.add("hidden");
+            document.getElementById("timer-bar-container").classList.add("hidden");
+            document.getElementById("options-container").classList.add("hidden");
+            document.getElementById("powerup-controls").classList.add("hidden");
+
+            document.getElementById("btn-reveal").classList.remove("hidden");
+            document.getElementById("btn-correct").classList.add("hidden");
+            document.getElementById("btn-wrong").classList.add("hidden");
+            document.getElementById("btn-apply-powerup").classList.add("hidden");
+            document.getElementById("btn-close-modal").classList.add("hidden");
+
+            // Handle Special Types
+            if (activeCard.type === "Choose the Door" && activeCard.options) {
+                const optBox = document.getElementById("options-container");
+                optBox.innerHTML = "";
+                optBox.classList.remove("hidden");
+                activeCard.options.forEach(opt => {
+                    optBox.innerHTML += `
+                        <div class="bg-indigo-50/70 border border-indigo-200 p-3 rounded-xl text-center font-bold text-lg text-indigo-900">
+                            ${opt}
+                        </div>
+                    `;
+                });
+            }
+
+            if (activeCard.isTimed) {
+                startTimer(activeCard.timerSeconds);
+            }
+
+            if (activeCard.type === "PowerUp") {
+                document.getElementById("btn-reveal").classList.add("hidden");
+                document.getElementById("btn-apply-powerup").classList.remove("hidden");
+                setupPowerUpTargetOptions();
+                playSound('powerup');
+            }
+
+            // Display Modal
+            const modal = document.getElementById("card-modal");
+            const box = document.getElementById("modal-box");
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                box.classList.remove("scale-95", "opacity-0");
+                box.classList.add("scale-100", "opacity-100");
+            }, 10);
+        }
+
+        function startTimer(seconds) {
+            const timerContainer = document.getElementById("timer-bar-container");
+            const timerText = document.getElementById("timer-text");
+            const timerFill = document.getElementById("timer-fill");
+            
+            timerContainer.classList.remove("hidden");
+            timerText.innerText = `${seconds}s`;
+            timerFill.style.width = "100%";
+
+            let timeLeft = seconds;
+            clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = `${timeLeft}s`;
+                timerFill.style.width = `${(timeLeft / seconds) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    playSound('wrong');
+                    timerText.innerText = "TIME'S UP!";
+                } else {
+                    playSound('tick');
+                }
+            }, 1000);
+        }
+
+        function revealAnswer() {
+            clearInterval(timerInterval);
+            playSound('flip');
+
+            const ansBox = document.getElementById("answer-box");
+            document.getElementById("answer-text").innerText = activeCard.answer;
+            document.getElementById("explanation-text").innerText = activeCard.explanation;
+            
+            ansBox.classList.remove("hidden");
+            document.getElementById("btn-reveal").classList.add("hidden");
+            document.getElementById("btn-correct").classList.remove("hidden");
+            document.getElementById("btn-wrong").classList.remove("hidden");
+        }
+
+        function processResult(isCorrect) {
+            playedCards.add(activeCard.id);
+            const currentTeam = teams[activeTeamIdx];
+
+            if (isCorrect) {
+                playSound('correct');
+                let awardedXP = activeCard.points;
+                
+                // Check 2x Multiplier
+                if (currentTeam.doubleNext) {
+                    awardedXP *= 2;
+                    currentTeam.doubleNext = false; // Reset multiplier after use
+                }
+
+                currentTeam.score += awardedXP;
+            } else {
+                playSound('wrong');
+            }
+
+            advanceTurn();
+            closeModal();
+            renderBoard();
+        }
+
+        /* ==========================================================================
+           6. POWER-UP MECHANICS
+           ========================================================================== */
+        function setupPowerUpTargetOptions() {
+            const controls = document.getElementById("powerup-controls");
+            const select = document.getElementById("target-team-select");
+            
+            // Only show target selector if card requires choosing another team
+            if (["STEAL_50", "CHALLENGE_TEAM", "SWAP_SCORES"].includes(activeCard.powerupType)) {
+                controls.classList.remove("hidden");
+                select.innerHTML = "";
+                
+                teams.forEach((t, idx) => {
+                    if (idx !== activeTeamIdx) {
+                        select.innerHTML += `<option value="${idx}">${t.name} (Score: ${t.score} XP)</option>`;
+                    }
+                });
+            }
+        }
+
+        function applyPowerUpEffect() {
+            playedCards.add(activeCard.id);
+            const currentTeam = teams[activeTeamIdx];
+            const targetIdx = parseInt(document.getElementById("target-team-select").value);
+            const targetTeam = teams[targetIdx];
+
+            switch (activeCard.powerupType) {
+                case "STEAL_50":
+                    if (targetTeam.shield) {
+                        targetTeam.shield = false; // Shield absorbs the attack
+                        alert(`🛡️ ${targetTeam.name}'s Shield protected them from losing XP!`);
+                    } else {
+                        const amount = Math.min(50, targetTeam.score);
+                        targetTeam.score -= amount;
+                        currentTeam.score += amount;
+                    }
+                    break;
+
+                case "DOUBLE_NEXT":
+                    currentTeam.doubleNext = true;
+                    break;
+
+                case "CHALLENGE_TEAM":
+                    // Set next active turn directly to the challenged team
+                    activeTeamIdx = targetIdx;
+                    renderTeams();
+                    break;
+
+                case "SHIELD":
+                    currentTeam.shield = true;
+                    break;
+
+                case "BONUS_100":
+                    currentTeam.score += 100;
+                    break;
+
+                case "SWAP_SCORES":
+                    if (targetTeam.shield) {
+                        targetTeam.shield = false;
+                        alert(`🛡️ ${targetTeam.name}'s Shield prevented the score swap!`);
+                    } else {
+                        const tempScore = currentTeam.score;
+                        currentTeam.score = targetTeam.score;
+                        targetTeam.score = tempScore;
+                    }
+                    break;
+            }
+
+            playSound('powerup');
+            if (activeCard.powerupType !== "CHALLENGE_TEAM") {
+                advanceTurn();
+            }
+            closeModal();
+            renderBoard();
+        }
+
+        function advanceTurn() {
+            activeTeamIdx = (activeTeamIdx + 1) % teams.length;
+            renderTeams();
+        }
+
+        function closeModal() {
+            clearInterval(timerInterval);
+            const modal = document.getElementById("card-modal");
+            const box = document.getElementById("modal-box");
+
+            box.classList.remove("scale-100", "opacity-100");
+            box.classList.add("scale-95", "opacity-0");
+            
+            setTimeout(() => {
+                modal.classList.add("hidden");
+            }, 200);
+        }
+
+        /* ==========================================================================
+           7. MODALS & RESETS
+           ========================================================================== */
+        function openRulesModal() {
+            document.getElementById("rules-modal").classList.remove("hidden");
+        }
+
+        function closeRulesModal() {
+            document.getElementById("rules-modal").classList.add("hidden");
+        }
+
+        function resetGameConfirmation() {
+            if (window.confirm("Are you sure you want to reset all team scores and tiles?")) {
+                playedCards.clear();
+                teams.forEach(t => {
+                    t.score = 0;
+                    t.shield = false;
+                    t.doubleNext = false;
+                });
+                activeTeamIdx = 0;
+                renderTeams();
+                renderBoard();
+            }
+        }
+    </script>
+</body>
+</html>
